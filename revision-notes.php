@@ -43,6 +43,7 @@ class HHS_Revision_Notes {
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 
 		add_filter( 'wp_prepare_revision_for_js', array( $this, 'wp_prepare_revision_for_js' ), 10, 2 );
+		add_filter( 'wp_post_revision_title_expanded', array( $this, 'wp_post_revision_title_expanded' ), 10, 2 );
 
 		// Use post_type_supports() to make showing/hiding of the field easy for devs.
 		// By default we'll show it for any post type that has an edit UI.
@@ -117,6 +118,27 @@ class HHS_Revision_Notes {
 		}
 
 		return $data;
+	}
+
+	public function wp_post_revision_title_expanded( $text, $revision ) {
+		// Some safeguards in case this is being called by somebody else for something else.
+		if ( ! is_admin() ) {
+			return $text;
+		}
+
+		$screen = get_current_screen();
+
+		if ( 'post' !== $screen->base ) {
+			return $text;
+		}
+
+		$note = get_metadata( 'post', $revision->ID, 'revision_note', true );
+
+		if ( ! empty( $note ) ) {
+			$text .= ' &mdash; <em>' . esc_html( $note ) . '</em>';
+		}
+
+		return $text;
 	}
 
 	public function add_column( $columns ) {
