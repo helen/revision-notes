@@ -42,6 +42,8 @@ class HHS_Revision_Notes {
 		add_action( 'post_submitbox_misc_actions', array( $this, 'edit_field' ) );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 
+		add_filter( 'wp_prepare_revision_for_js', array( $this, 'wp_prepare_revision_for_js' ), 10, 2 );
+
 		// Use post_type_supports() to make showing/hiding of the field easy for devs.
 		// By default we'll show it for any post type that has an edit UI.
 		$post_types = get_post_types( array( 'show_ui' => true ) );
@@ -104,6 +106,17 @@ class HHS_Revision_Notes {
 		// save_post actually runs a second time on the parent post,
 		// so it will also be stored as the latest note in the parent post's meta.
 		update_metadata( 'post', $post_id, 'revision_note', $note );
+	}
+
+	public function wp_prepare_revision_for_js( $data, $revision ) {
+		$note = esc_html( get_metadata( 'post', $revision->ID, 'revision_note', true ) );
+
+		if ( ! empty( $note ) ) {
+			/* Translators: 1: revision note; 2: time ago; */
+			$data['timeAgo'] = sprintf( __( 'Note: %1$s - %2$s', 'revision-notes' ), $note, $data['timeAgo'] );
+		}
+
+		return $data;
 	}
 
 	public function add_column( $columns ) {
