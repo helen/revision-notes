@@ -122,6 +122,8 @@ class HHS_Revision_Notes {
 
 	public function wp_post_revision_title_expanded( $text, $revision ) {
 		// Some safeguards in case this is being called by somebody else for something else.
+		// We may want to do these checks elsewhere so that this function can still be used
+		// in other contexts should a developer want to do so.
 		if ( ! is_admin() ) {
 			return $text;
 		}
