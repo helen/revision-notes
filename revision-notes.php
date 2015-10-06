@@ -10,7 +10,7 @@ Text Domain: revision-notes
 */
 
 /*
-Copyright 2013 Helen Hou-Sandí
+Copyright 2015 Helen Hou-Sandí
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
