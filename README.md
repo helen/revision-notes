@@ -27,7 +27,10 @@ Revision Notes is meant to be a plugin that "just works" when activated, and doe
 
 ## Screenshots ##
 
-1. Revision note field
+1. Revision note field in the publish metabox
+2. Note displayed in the revisions metabox
+3. Note displayed on the revisions comparison screen
+4. Note displayed in the posts list table
 
 ## Changelog ##
 
