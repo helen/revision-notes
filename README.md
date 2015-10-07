@@ -11,6 +11,8 @@ Add a note explaining the changes you're about to save. It's like commit message
 
 Enter a message describing the changes you are about to save in the Publish box, to be displayed around the admin. This is especially helpful amongst groups of editors, but can also be useful for your future self.
 
+**Important note:** This plugin requires WordPress 4.4 for full functionality. Versions below 4.4 will be able to enter and save revision notes, but will only display the latest note in the All Posts list.
+
 ### Contributing ###
 
 Pull requests and issues on [GitHub](https://github.com/helenhousandi/revision-notes) welcome.
