@@ -33,7 +33,7 @@ defined( 'WPINC' ) or die;
 class HHS_Revision_Notes {
 
 	public function __construct() {
-		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
+		add_action( 'init', array( $this, 'plugins_loaded' ), 99 );
 	}
 
 	public function plugins_loaded() {
