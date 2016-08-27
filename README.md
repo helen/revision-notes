@@ -36,5 +36,10 @@ Revision Notes is meant to be a plugin that "just works" when activated, and doe
 
 ## Changelog ##
 
+### 1.1 ###
+Thanks to Kenshino for the following:
+* Initialize the plugin after the point custom post types are registered.
+* Set a translations directory per plugin standard.
+
 ### 1.0 ###
 * Initial release
