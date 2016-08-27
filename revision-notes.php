@@ -33,11 +33,11 @@ defined( 'WPINC' ) or die;
 class HHS_Revision_Notes {
 
 	public function __construct() {
-		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
+		add_action( 'init', array( $this, 'init' ), 99 );
 	}
 
-	public function plugins_loaded() {
-		load_plugin_textdomain( 'revision-notes' );
+	public function init() {
+		load_plugin_textdomain( 'revision-notes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
 		add_action( 'post_submitbox_misc_actions', array( $this, 'edit_field' ) );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
@@ -110,6 +110,7 @@ class HHS_Revision_Notes {
 	}
 
 	public function wp_prepare_revision_for_js( $data, $revision ) {
+
 		$note = esc_html( get_metadata( 'post', $revision->ID, 'revision_note', true ) );
 
 		if ( ! empty( $note ) ) {
