@@ -1,0 +1,25 @@
+# Exclude these files from the git repo
+
+# Note: the trailing /* is significant. If a directory is excluded, Git will never look
+# at the contents of that directory. The pattern dir/ excludes a directory named dir
+# and (implicitly) everything under it. The pattern dir/* says nothing about dir itself;
+# it just excludes everything under dir. With dir/, Git will never look at anything under
+# dir, and thus will never apply any of the “un-exclude” patterns to anything under dir.
+# With dir/*, Git will process the direct contents of dir, giving other patterns a chance
+# to un-exclude some bit of the content.
+
+# src http://git-scm.com/docs/gitignore
+
+# Ignore Hidden system files and editor footprints
+*.DS_Store
+*[Tt]humbs.db
+*.Trashes
+**/~*
+
+# ignore all composer installed packages
+**/vendor/
+composer.lock
+
+# ignore all node/webpack installed packages
+**/node_modules/
+package-lock.json

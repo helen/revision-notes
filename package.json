@@ -1,0 +1,14 @@
+{
+  "name": "mandatory-excerpt",
+  "version": "1.1.0",
+  "description": "Put description here",
+  "main": "js/mandatory-excerpt.js",
+  "scripts": {
+    "build": "wp-scripts build"
+  },
+  "author": "theMikeD",
+  "license": "GPL-2.0-only",
+  "devDependencies": {
+    "@wordpress/scripts": "6.2.0"
+  }
+}

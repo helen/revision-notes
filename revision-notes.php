@@ -45,6 +45,10 @@ class HHS_Revision_Notes {
 		add_filter( 'wp_prepare_revision_for_js', array( $this, 'wp_prepare_revision_for_js' ), 10, 2 );
 		add_filter( 'wp_post_revision_title_expanded', array( $this, 'wp_post_revision_title_expanded' ), 10, 2 );
 
+        error_log( plugins_url(  DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'revision-notes.js', __FILE__ )  );
+
+
+
 		// Use post_type_supports() to make showing/hiding of the field easy for devs.
 		// By default we'll show it for any post type that has an edit UI.
 		$post_types = get_post_types( array( 'show_ui' => true ) );
@@ -57,7 +61,47 @@ class HHS_Revision_Notes {
 				add_action( "manage_{$post_type}_posts_custom_column", array( $this, 'show_column' ), 10, 2 );
 			}
 		}
+
+		$this->register_block_editor_assets();
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
+		register_post_meta( 'post', 'revision_note', array(
+				'show_in_rest' => true,
+				'single' => true,
+				'type' => 'string',
+		) );
 	}
+
+
+	/**
+	 * Register assets required by gutenberg.
+	 */
+	public function register_block_editor_assets() {
+		wp_register_script(
+				'revision-notes-js',
+				plugins_url(  DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'revision-notes.js', __FILE__ ),
+				array( 'wp-plugins', 'wp-edit-post', 'wp-element', 'wp-components', 'wp-data', 'wp-compose' ),
+				'1.0.0',
+				true
+		);
+		wp_register_style(
+				'revision-notes-css',
+				plugins_url(  DIRECTORY_SEPARATOR . 'css' . DIRECTORY_SEPARATOR . 'revision-notes.css', __FILE__ ),
+				array(),
+				'1.0.0',
+				'all'
+		);
+
+    }
+
+
+	/**
+	 * Enqueue assets required by gutenberg. Called via add_action().
+	 */
+    public function enqueue_block_editor_assets() {
+		wp_enqueue_script( 'revision-notes-js' );
+		wp_enqueue_style( 'revision-notes-css' );
+    }
+
 
 	public function edit_field() {
 		$post = get_post();
