@@ -1,12 +1,12 @@
 {
-  "name": "mandatory-excerpt",
-  "version": "1.1.0",
-  "description": "Put description here",
+  "name": "revision-notes",
+  "version": "2.0",
+  "description": "Add a note explaining the changes you're about to save. It's like commit messages, except for your WordPress content",
   "main": "js/mandatory-excerpt.js",
   "scripts": {
     "build": "wp-scripts build"
   },
-  "author": "theMikeD",
+  "author": "Helen Hou-Sandí",
   "license": "GPL-2.0-only",
   "devDependencies": {
     "@wordpress/scripts": "6.2.0"
