@@ -39,6 +39,8 @@ class HHS_Revision_Notes {
 				add_action( "manage_{$post_type}_posts_custom_column", array( $this, 'show_column' ), 10, 2 );
 			}
 		}
+
+		add_action( 'enqueue_block_editor_assets', array( $this, 'block_editor_assets' ) );
 	}
 
 	public function edit_field() {
@@ -144,6 +146,17 @@ class HHS_Revision_Notes {
 		}
 
 		echo esc_html( $note );
+	}
+
+	public function block_editor_assets() {
+		$script_asset = require 'build/index.asset.php';
+
+		wp_enqueue_script(
+			'revision-notes-block-editor',
+			plugin_dir_url( __FILE__ ) . 'build/index.js',
+			$script_asset['dependencies'],
+			$script_asset['version']
+		);
 	}
 }
 
