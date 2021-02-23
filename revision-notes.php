@@ -41,6 +41,12 @@ class HHS_Revision_Notes {
 		}
 
 		add_action( 'enqueue_block_editor_assets', array( $this, 'block_editor_assets' ) );
+
+		register_meta( 'post', 'revision_note', [
+			'type' => 'string',
+			'single' => true,
+			'show_in_rest' => true,
+		] );
 	}
 
 	public function edit_field() {
@@ -65,32 +71,45 @@ class HHS_Revision_Notes {
 	}
 
 	public function save_post( $post_id, $post ) {
-		// verify nonce
-		if ( ! isset( $_POST['hhs_revision_notes_nonce'] ) ||
-			! wp_verify_nonce( $_POST['hhs_revision_notes_nonce'], 'hhs-revision-notes-save' )
-		) {
-			return;
+		// Classic editor handling of $_POST value from metabox
+		// Technically the else case would also handle revisions in classic editor,
+		// but let's just leave this as-is for now.
+		if ( ! empty( $_POST['hhs_revision_note'] ) ) {
+			// verify nonce
+			if ( ! isset( $_POST['hhs_revision_notes_nonce'] ) ||
+				! wp_verify_nonce( $_POST['hhs_revision_notes_nonce'], 'hhs-revision-notes-save' )
+			) {
+				return;
+			}
+
+			if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+				return;
+			}
+
+			if ( ! current_user_can( 'edit_post', $post_id ) ) {
+				return;
+			}
+
+			$note = wp_strip_all_tags( $_POST['hhs_revision_note'] );
+
+			// Save the note as meta on the revision itself.
+			// save_post actually runs a second time on the parent post,
+			// so it will also be stored as the latest note in the parent post's meta.
+			update_metadata( 'post', $post_id, 'revision_note', $note );
+		} elseif ( 'revision' === get_post_type( $post ) ) {
+			// Block editor/non-nonce handling
+			// Regular post meta is handled via REST API, but we still have to do the revision storage.
+			// No cap checking, but it's coming from the post itself anyway,
+			// so the biggest potential issue is if revisions are being created in other instances,
+			// they might end up with duplicate / inaccurate revision notes.
+			// This relies on the revision being saved after the parent as specified by core!
+			$parent = wp_is_post_revision( $post );
+			$note = get_post_meta( $parent, 'revision_note', true );
+
+			if ( ! empty( $note ) ) {
+				update_metadata( 'post', $post->ID, 'revision_note', wp_slash( $note ) );
+			}
 		}
-
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return;
-		}
-
-		if ( ! current_user_can( 'edit_post', $post_id ) ) {
-			return;
-		}
-
-		// We don't need to bother with empties or deleting existing notes.
-		if ( ! isset( $_POST['hhs_revision_note'] ) || empty( $_POST['hhs_revision_note'] ) ) {
-			return;
-		}
-
-		$note = wp_strip_all_tags( $_POST['hhs_revision_note'] );
-
-		// Save the note as meta on the revision itself.
-		// save_post actually runs a second time on the parent post,
-		// so it will also be stored as the latest note in the parent post's meta.
-		update_metadata( 'post', $post_id, 'revision_note', $note );
 	}
 
 	public function wp_prepare_revision_for_js( $data, $revision ) {
