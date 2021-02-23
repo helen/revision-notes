@@ -1,31 +1,15 @@
 <?php
-/*
-Plugin Name: Revision Notes
-Plugin URI: http://wordpress.org/plugins/revision-notes/
-Description: Add a note explaining the changes you're about to save. It's like commit messages, except for your WordPress content.
-Version: 1.1
-Author: Helen Hou-Sandí
-Author URI: http://helenhousandi.com/
-Text Domain: revision-notes
-*/
-
-/*
-Copyright 2015 Helen Hou-Sandí
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+/**
+ * Plugin Name: Revision Notes
+ * Plugin URI: http://wordpress.org/plugins/revision-notes/
+ * Description: Add a note explaining the changes you're about to save. It's like commit messages, except for your WordPress content.
+ * Version: 1.1
+ * Author: Helen Hou-Sandí
+ * Author URI: https://helen.blog/
+ * Text Domain: revision-notes
+ * License: GPLv2
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ */
 
 defined( 'WPINC' ) or die;
 
