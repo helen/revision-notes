@@ -105,10 +105,14 @@ class HHS_Revision_Notes {
 			// This relies on the revision being saved after the parent as specified by core!
 			$parent = wp_is_post_revision( $post );
 			$note = get_post_meta( $parent, 'revision_note', true );
+			$test = get_post_meta( $parent, 'test', true );
 
 			if ( ! empty( $note ) ) {
 				update_metadata( 'post', $post->ID, 'revision_note', wp_slash( $note ) );
+				update_metadata( 'post', $post->ID, 'test', wp_slash( $test ) );
 			}
+		} else {
+			update_metadata( 'post', $post->ID, 'test', $post->post_content );
 		}
 	}
 
