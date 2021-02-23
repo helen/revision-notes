@@ -21,8 +21,6 @@ class HHS_Revision_Notes {
 	}
 
 	public function init() {
-		load_plugin_textdomain( 'revision-notes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
-
 		add_action( 'post_submitbox_misc_actions', array( $this, 'edit_field' ) );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 
