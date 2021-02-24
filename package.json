@@ -1,0 +1,13 @@
+{
+	"name": "revision-notes",
+	"version": "2.0.0",
+	"description": "Add a note explaining the changes you're about to save. It's like commit messages, except for your WordPress content",
+	"scripts": {
+		"build": "wp-scripts build"
+	},
+	"author": "Helen Hou-Sandí",
+	"license": "GPL-2.0-only",
+	"devDependencies": {
+		"@wordpress/scripts": "^13.0.3"
+	}
+}
