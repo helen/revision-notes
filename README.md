@@ -1,9 +1,9 @@
 # Revision Notes #
 Contributors: helen  
-Requires at least: 4.4  
+Requires at least: 4.7  
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
-Stable tag: trunk  
+Stable tag: 2.0  
 
 Add a note explaining the changes you're about to save. It's like commit messages, except for your WordPress content.
 
@@ -29,12 +29,30 @@ Revision Notes is meant to be a plugin that "just works" when activated, and doe
 
 ## Screenshots ##
 
-1. Revision note field in the publish metabox
-2. Note displayed in the revisions metabox
-3. Note displayed on the revisions comparison screen
-4. Note displayed in the posts list table
+### 1. Revision note field in the block editor sidebar
+
+![Screenshot of block editor](.wordpress-org/screenshot-1.png)
+
+### 2. Revision note field in the classic editor publish metabox
+
+![Screenshot of classic editor](.wordpress-org/screenshot-2.png)
+
+### 3. Note displayed in the revisions metabox
+
+![Screenshot of revisions metabox](.wordpress-org/screenshot-3.png)
+
+### 4. Note displayed on the revisions comparison screen
+
+![Screenshot of revisions screen](.wordpress-org/screenshot-4.png)
+
+### 5. Note displayed in the posts list table
+
+![Screenshot of posts list](.wordpress-org/screenshot-5.png)
 
 ## Changelog ##
+
+### 2.0 ###
+* Block editor support (with thanks to theMikeD, TimothyBJacobs, and johnwatkins0)
 
 ### 1.1 ###
 Thanks to Kenshino for the following:
