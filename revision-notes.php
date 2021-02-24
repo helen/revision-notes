@@ -1,31 +1,15 @@
 <?php
-/*
-Plugin Name: Revision Notes
-Plugin URI: http://wordpress.org/plugins/revision-notes/
-Description: Add a note explaining the changes you're about to save. It's like commit messages, except for your WordPress content.
-Version: 1.1
-Author: Helen Hou-Sandí
-Author URI: http://helenhousandi.com/
-Text Domain: revision-notes
-*/
-
-/*
-Copyright 2015 Helen Hou-Sandí
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+/**
+ * Plugin Name: Revision Notes
+ * Plugin URI: http://wordpress.org/plugins/revision-notes/
+ * Description: Add a note explaining the changes you're about to save. It's like commit messages, except for your WordPress content.
+ * Version: 2.0
+ * Author: Helen Hou-Sandí
+ * Author URI: https://helen.blog/
+ * Text Domain: revision-notes
+ * License: GPLv2
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ */
 
 defined( 'WPINC' ) or die;
 
@@ -37,10 +21,17 @@ class HHS_Revision_Notes {
 	}
 
 	public function init() {
-		load_plugin_textdomain( 'revision-notes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
-
 		add_action( 'post_submitbox_misc_actions', array( $this, 'edit_field' ) );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
+
+		// As of 5.6, revisions are created too early for REST requests
+		// so move the revision saving to after the post is fully inserted including meta.
+		// This is fine for the classic editor too.
+		// For future-proofing and compat, check to make sure it's hooked on already.
+		if ( has_action( 'post_updated', 'wp_save_post_revision' ) ) {
+			remove_action( 'post_updated', 'wp_save_post_revision', 10, 1 );
+			add_action( 'wp_after_insert_post', array( $this, 'maybe_save_revision' ), 10, 3 );
+		}
 
 		add_filter( 'wp_prepare_revision_for_js', array( $this, 'wp_prepare_revision_for_js' ), 10, 2 );
 		add_filter( 'wp_post_revision_title_expanded', array( $this, 'wp_post_revision_title_expanded' ), 10, 2 );
@@ -55,8 +46,24 @@ class HHS_Revision_Notes {
 
 				add_action( "manage_edit-{$post_type}_columns", array( $this, 'add_column' ) );
 				add_action( "manage_{$post_type}_posts_custom_column", array( $this, 'show_column' ), 10, 2 );
+
+				register_rest_field(
+					$post_type,
+					'revision_note',
+					array(
+						'get_callback'    => '__return_empty_string',
+						'update_callback' => function ( $value, $post ) {
+							update_post_meta( $post->ID, 'revision_note', $value );
+						},
+						'schema'          => array(
+							'type' => 'string',
+						),
+					)
+				);
 			}
 		}
+
+		add_action( 'enqueue_block_editor_assets', array( $this, 'block_editor_assets' ) );
 	}
 
 	public function edit_field() {
@@ -81,32 +88,53 @@ class HHS_Revision_Notes {
 	}
 
 	public function save_post( $post_id, $post ) {
-		// verify nonce
-		if ( ! isset( $_POST['hhs_revision_notes_nonce'] ) ||
-			! wp_verify_nonce( $_POST['hhs_revision_notes_nonce'], 'hhs-revision-notes-save' )
-		) {
+		// Classic editor handling of $_POST value from metabox
+		// Technically the else case would also handle revisions in classic editor,
+		// but let's just leave this as-is for now.
+		if ( ! empty( $_POST['hhs_revision_note'] ) ) {
+			// verify nonce
+			if ( ! isset( $_POST['hhs_revision_notes_nonce'] ) ||
+				! wp_verify_nonce( $_POST['hhs_revision_notes_nonce'], 'hhs-revision-notes-save' )
+			) {
+				return;
+			}
+
+			if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+				return;
+			}
+
+			if ( ! current_user_can( 'edit_post', $post_id ) ) {
+				return;
+			}
+
+			$note = wp_strip_all_tags( $_POST['hhs_revision_note'] );
+
+			// Save the note as meta on the revision itself.
+			// save_post actually runs a second time on the parent post,
+			// so it will also be stored as the latest note in the parent post's meta.
+			update_metadata( 'post', $post_id, 'revision_note', $note );
+		} elseif ( 'revision' === get_post_type( $post ) ) {
+			// Block editor/non-nonce handling
+			// Regular post meta is handled via REST API, but we still have to do the revision storage.
+			// No cap checking, but it's coming from the post itself anyway,
+			// so the biggest potential issue is if revisions are being created in other instances,
+			// they might end up with duplicate / inaccurate revision notes.
+			// This relies on the revision being saved after the parent as specified by core!
+			$parent = wp_is_post_revision( $post );
+			$note = get_post_meta( $parent, 'revision_note', true );
+
+			if ( ! empty( $note ) ) {
+				update_metadata( 'post', $post->ID, 'revision_note', wp_slash( $note ) );
+			}
+		}
+	}
+
+	public function maybe_save_revision( $post_id, $post, $update ) {
+		if ( ! $update ) {
 			return;
 		}
 
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return;
-		}
-
-		if ( ! current_user_can( 'edit_post', $post_id ) ) {
-			return;
-		}
-
-		// We don't need to bother with empties or deleting existing notes.
-		if ( ! isset( $_POST['hhs_revision_note'] ) || empty( $_POST['hhs_revision_note'] ) ) {
-			return;
-		}
-
-		$note = wp_strip_all_tags( $_POST['hhs_revision_note'] );
-
-		// Save the note as meta on the revision itself.
-		// save_post actually runs a second time on the parent post,
-		// so it will also be stored as the latest note in the parent post's meta.
-		update_metadata( 'post', $post_id, 'revision_note', $note );
+		wp_save_post_revision( $post_id );
 	}
 
 	public function wp_prepare_revision_for_js( $data, $revision ) {
@@ -162,6 +190,17 @@ class HHS_Revision_Notes {
 		}
 
 		echo esc_html( $note );
+	}
+
+	public function block_editor_assets() {
+		$script_asset = require 'build/index.asset.php';
+
+		wp_enqueue_script(
+			'revision-notes-block-editor',
+			plugin_dir_url( __FILE__ ) . 'build/index.js',
+			$script_asset['dependencies'],
+			$script_asset['version']
+		);
 	}
 }
 
