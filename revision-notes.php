@@ -46,16 +46,24 @@ class HHS_Revision_Notes {
 
 				add_action( "manage_edit-{$post_type}_columns", array( $this, 'add_column' ) );
 				add_action( "manage_{$post_type}_posts_custom_column", array( $this, 'show_column' ), 10, 2 );
+
+				register_rest_field(
+					$post_type,
+					'revision_note',
+					array(
+						'get_callback'    => '__return_empty_string',
+						'update_callback' => function ( $value, $post ) {
+							update_post_meta( $post->ID, 'revision_note', $value );
+						},
+						'schema'          => array(
+							'type' => 'string',
+						),
+					)
+				);
 			}
 		}
 
 		add_action( 'enqueue_block_editor_assets', array( $this, 'block_editor_assets' ) );
-
-		register_meta( 'post', 'revision_note', array(
-			'type' => 'string',
-			'single' => true,
-			'show_in_rest' => true,
-		 ) );
 	}
 
 	public function edit_field() {
