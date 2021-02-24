@@ -24,6 +24,15 @@ class HHS_Revision_Notes {
 		add_action( 'post_submitbox_misc_actions', array( $this, 'edit_field' ) );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 
+		// As of 5.6, revisions are created too early for REST requests
+		// so move the revision saving to after the post is fully inserted including meta.
+		// This is fine for the classic editor too.
+		// For future-proofing and compat, check to make sure it's hooked on already.
+		if ( has_action( 'post_updated', 'wp_save_post_revision' ) ) {
+			remove_action( 'post_updated', 'wp_save_post_revision', 10, 1 );
+			add_action( 'wp_after_insert_post', array( $this, 'maybe_save_revision' ), 10, 3 );
+		}
+
 		add_filter( 'wp_prepare_revision_for_js', array( $this, 'wp_prepare_revision_for_js' ), 10, 2 );
 		add_filter( 'wp_post_revision_title_expanded', array( $this, 'wp_post_revision_title_expanded' ), 10, 2 );
 
@@ -42,11 +51,11 @@ class HHS_Revision_Notes {
 
 		add_action( 'enqueue_block_editor_assets', array( $this, 'block_editor_assets' ) );
 
-		register_meta( 'post', 'revision_note', [
+		register_meta( 'post', 'revision_note', array(
 			'type' => 'string',
 			'single' => true,
 			'show_in_rest' => true,
-		] );
+		 ) );
 	}
 
 	public function edit_field() {
@@ -105,15 +114,19 @@ class HHS_Revision_Notes {
 			// This relies on the revision being saved after the parent as specified by core!
 			$parent = wp_is_post_revision( $post );
 			$note = get_post_meta( $parent, 'revision_note', true );
-			$test = get_post_meta( $parent, 'test', true );
 
 			if ( ! empty( $note ) ) {
 				update_metadata( 'post', $post->ID, 'revision_note', wp_slash( $note ) );
-				update_metadata( 'post', $post->ID, 'test', wp_slash( $test ) );
 			}
-		} else {
-			update_metadata( 'post', $post->ID, 'test', $post->post_content );
 		}
+	}
+
+	public function maybe_save_revision( $post_id, $post, $update ) {
+		if ( ! $update ) {
+			return;
+		}
+
+		wp_save_post_revision( $post_id );
 	}
 
 	public function wp_prepare_revision_for_js( $data, $revision ) {
