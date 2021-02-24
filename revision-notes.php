@@ -3,7 +3,7 @@
  * Plugin Name: Revision Notes
  * Plugin URI: http://wordpress.org/plugins/revision-notes/
  * Description: Add a note explaining the changes you're about to save. It's like commit messages, except for your WordPress content.
- * Version: 1.1
+ * Version: 2.0
  * Author: Helen Hou-Sandí
  * Author URI: https://helen.blog/
  * Text Domain: revision-notes
