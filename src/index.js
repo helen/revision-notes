@@ -7,6 +7,9 @@ import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
  
 const RevisionNotesField = () => {
+	// Revision notes are entered to be saved, not to be edited,
+	// so we use state instead of the actual meta for display value,
+	// resetting it when a post save action happens.
 	const [ revisionNote, setRevisionNote ] = useState('');
 
 	const { isSavingPost } = useSelect(
