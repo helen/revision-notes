@@ -37,8 +37,8 @@ class HHS_Revision_Notes {
 		add_filter( 'wp_post_revision_title_expanded', array( $this, 'wp_post_revision_title_expanded' ), 10, 2 );
 
 		// Use post_type_supports() to make showing/hiding of the field easy for devs.
-		// By default we'll show it for any post type that has an edit UI.
-		$post_types = get_post_types( array( 'show_ui' => true ) );
+		// By default we'll show it for any post type that supports revisions.
+		$post_types = get_post_types_by_support( 'revisions' );
 
 		if ( ! empty( $post_types ) ) {
 			foreach ( $post_types as $post_type ) {
